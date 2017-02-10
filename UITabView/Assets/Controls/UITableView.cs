@@ -1,3 +1,5 @@
+#define _AsyncGetData
+
 /*----------------------------------------------------------------
 // Copyright (C) 2015 传世工作室
 //
@@ -215,6 +217,58 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		mItemList.Clear();
 	}
 
+	IEnumerator NodeListDoGetDataAsync()
+	{
+		if (mScrollView == null)
+			yield break;
+
+		// 防止滚动了
+		mScrollView.enabled = false;
+
+		var node = mItemList.First;
+		int index = mItemTopIndex;
+		while (node != null)
+		{
+			yield return null;
+
+			if (node.Value == null)
+			{
+				node = node.Next;
+				++index;
+				continue;
+			}
+			DoGetData(node.Value, index);
+			++index;
+			node = node.Next;
+		}
+
+		mScrollView.enabled = true;
+	}
+
+	void NodeListDoGetData()
+	{
+		#if _AsyncGetData
+		StopCreateCoroutne();
+		m_CreateCoroutne = StartCoroutine(NodeListDoGetDataAsync());
+		#else
+		// 循环获得数据
+		var node = mItemList.First;
+		int index = mItemTopIndex;
+		while (node != null)
+		{
+			if (node.Value == null)
+			{
+				node = node.Next;
+				++index;
+				continue;
+			}
+			DoGetData(node.Value, index);
+			++index;
+			node = node.Next;
+		}
+		#endif
+	}
+
 	void refreshItems()
 	{
 		if (mIsFirstRun) {
@@ -245,21 +299,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		if (mIsFirstRun) {
 			if (mItemList != null)
 			{
-				// 循环获得数据
-				var node = mItemList.First;
-				int index = mItemTopIndex;
-				while (node != null)
-				{
-					if (node.Value == null)
-					{
-						node = node.Next;
-						++index;
-						continue;
-					}
-					DoGetData(node.Value, index);
-					++index;
-					node = node.Next;
-				}
+				NodeListDoGetData();
 			}
 
 			CheckScrollBarVisible();
@@ -955,6 +995,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 		if (mItemList == null)
 			mItemList = new LinkedList<UIWidget> ();
+		
 		ReCountList (Cnt);
 	}
 
@@ -964,6 +1005,26 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		mItemTopIndex = -1;
 		mItemBottomIndex = -1;
 
+	}
+
+	private Coroutine m_CreateCoroutne = null;
+	private void StopCreateCoroutne()
+	{
+		if (m_CreateCoroutne != null)
+		{
+			StopCoroutine(m_CreateCoroutne);
+			m_CreateCoroutne = null;
+		}
+	}
+
+	void DoDestroy()
+	{
+		StopCreateCoroutne();
+	}
+
+	void OnDestroy()
+	{
+		DoDestroy();
 	}
 
 	private void DoGetData(UIWidget item, int index)
