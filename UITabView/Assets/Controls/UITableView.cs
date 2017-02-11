@@ -1,15 +1,3 @@
-#define _AsyncGetData
-
-/*----------------------------------------------------------------
-// Copyright (C) 2015 传世工作室
-//
-// 模块名：TableView
-// 创建者：zengyi
-// 修改者列表：
-// 创建日期：2015年5月19日
-// 模块描述：
-//----------------------------------------------------------------*/
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -247,10 +235,12 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 	void NodeListDoGetData()
 	{
-		#if _AsyncGetData
-		StopCreateCoroutne();
-		m_CreateCoroutne = StartCoroutine(NodeListDoGetDataAsync());
-		#else
+		if (IsAsynInitData)
+		{
+			StopCreateCoroutne();
+			m_CreateCoroutne = StartCoroutine(NodeListDoGetDataAsync());
+			return;
+		}
 		// 循环获得数据
 		var node = mItemList.First;
 		int index = mItemTopIndex;
@@ -266,7 +256,6 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			++index;
 			node = node.Next;
 		}
-		#endif
 	}
 
 	void refreshItems()
@@ -1364,6 +1353,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	public UIWidget ItemObject = null;
 	public int ItemCount = 0;
 	public int ItemDepth = 0;
+	public bool IsAsynInitData = true;
 
 	// 是否按需显示ScrollBar
 	public bool IsNeetShowScrollBar = false;
