@@ -642,7 +642,10 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 	private void DoScrollIndex ()
 	{
-		if (mScrollIndex < 0)
+		if (mScrollIndex < 0 || mScrollView == null)
+			return;
+
+		if (!mScrollView.enabled)
 			return;
 
 		// 无法滚动
@@ -657,7 +660,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			return;
 		}
 
-		StopCreateCoroutne();
+		//StopCreateCoroutne();
 		
 		// 1.在可滚动范围内
 		int itemTopIndex;
@@ -703,7 +706,10 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	{
 		if (mScrollView == null || !mIsScroll)
 			return;
-		
+
+		if (!mScrollView.enabled)
+			return;
+
 		if (mScrollView.isDragging) {
 			mScroll = 0;
 			mIsScroll = false;
@@ -730,7 +736,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			return;
 		}
 
-		StopCreateCoroutne();
+		//StopCreateCoroutne();
 
 		mScrollView.MoveRelative (offset);
 		float lastScroll = mScroll;
