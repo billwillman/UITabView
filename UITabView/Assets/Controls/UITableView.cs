@@ -5,7 +5,7 @@ using UnityEngine;
 
 public interface ITableViewData
 {
-	void OnTabViewData (int index, UIWidget item);
+	bool OnTabViewData (int index, UIWidget item);
 }
 
 // TabViewScrollBar接口, 需要让UIScrollView调用
@@ -76,7 +76,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		set;
 	}
 
-	public Action<int, UIWidget> OnDataEvent
+	public Func<int, UIWidget, bool> OnDataEvent
 	{
 		get;
 		set;
@@ -225,7 +225,11 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				++index;
 				continue;
 			}
-			DoGetData(node.Value, index);
+
+			// 直到设置完值再返回
+			while (!DoGetData(node.Value, index))
+				yield return null;
+			
 			++index;
 			node = node.Next;
 		}
@@ -1016,7 +1020,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		DoDestroy();
 	}
 
-	private void DoGetData(UIWidget item, int index)
+	private bool DoGetData(UIWidget item, int index)
 	{
 		if (index < ItemCount) {
 			UITabViewItem iter = item.GetComponent<UITabViewItem> ();
@@ -1024,11 +1028,13 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				iter.Index = index;
 		}
 
+
+		bool ret = true;
 		// 处理调用赋值接口
 		if (Data != null) {
 			if (index < ItemCount) {
 				item.cachedGameObject.SetActive(true);
-				Data.OnTabViewData (index, item);
+				ret = Data.OnTabViewData (index, item);
 			} else
 				item.cachedGameObject.SetActive (false);
 		} else
@@ -1036,7 +1042,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			if (index < ItemCount)
 			{
 				item.cachedGameObject.SetActive(true);
-				OnDataEvent(index, item);
+				ret = OnDataEvent(index, item);
 			}
 			else
 				item.cachedGameObject.SetActive (false);
@@ -1044,6 +1050,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 #if UNITY_EDITOR
 	//	LogMgr.Instance.Log(string.Format("get {0:d} data!", index));
 #endif
+
+		return ret;
 	}
 	
 	private bool IsItemVisible(UIWidget item)
