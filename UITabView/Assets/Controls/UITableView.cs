@@ -5,7 +5,7 @@ using UnityEngine;
 
 public interface ITableViewData
 {
-	bool OnTabViewData (int index, UIWidget item);
+	void OnTabViewData (int index, UIWidget item, int subIndex);
 }
 
 // TabViewScrollBar接口, 需要让UIScrollView调用
@@ -76,7 +76,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		set;
 	}
 
-	public Func<int, UIWidget, bool> OnDataEvent
+	public Action<int, UIWidget, int> OnDataEvent
 	{
 		get;
 		set;
@@ -227,8 +227,14 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			}
 
 			// 直到设置完值再返回
-			while (!DoGetData(node.Value, index))
+			int subCnt = SubItemCount;
+			if (subCnt <= 0)
+				subCnt = 1;
+			for (int subIndex = 0; subIndex < subCnt; ++subIndex)
+			{
+				DoGetData(node.Value, index, subIndex);
 				yield return null;
+			}
 			
 			++index;
 			node = node.Next;
@@ -256,7 +262,9 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				++index;
 				continue;
 			}
-			DoGetData(node.Value, index);
+
+			RefreshSubItem(node.Value, index);
+
 			++index;
 			node = node.Next;
 		}
@@ -435,6 +443,18 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		ScrollBar.value = scrollValue;
 
 	}
+
+	private void RefreshSubItem(UIWidget widget, int index)
+	{
+		// 直到设置完值再返回
+		int subCnt = SubItemCount;
+		if (subCnt <= 0)
+			subCnt = 1;
+		for (int subIndex = 0; subIndex < subCnt; ++subIndex)
+		{
+			DoGetData(widget, index, subIndex);
+		}
+	}
 	
 	public void RefreshDataAtViewRect()
 	{
@@ -464,7 +484,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		int idx = mItemTopIndex;
 		while (node != null && node.Value != null)
 		{
-			DoGetData(node.Value, idx);
+			// 直到设置完值再返回
+			RefreshSubItem(node.Value, idx);
 			++idx;
 			node = node.Next;
 		}
@@ -593,7 +614,9 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		{
 			UITabViewItem item = node.Value.GetComponent<UITabViewItem>();
 			if (item != null)
-				DoGetData(node.Value, item.Index);
+			{
+				RefreshSubItem(node.Value, item.Index);
+			}
 			node = node.Previous;
 		}
 	}
@@ -1019,8 +1042,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	{
 		DoDestroy();
 	}
-
-	private bool DoGetData(UIWidget item, int index)
+		
+	private void DoGetData(UIWidget item, int index, int subIndex)
 	{
 		if (index < ItemCount) {
 			UITabViewItem iter = item.GetComponent<UITabViewItem> ();
@@ -1028,13 +1051,11 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				iter.Index = index;
 		}
 
-
-		bool ret = true;
 		// 处理调用赋值接口
 		if (Data != null) {
 			if (index < ItemCount) {
 				item.cachedGameObject.SetActive(true);
-				ret = Data.OnTabViewData (index, item);
+				Data.OnTabViewData (index, item, subIndex);
 			} else
 				item.cachedGameObject.SetActive (false);
 		} else
@@ -1042,7 +1063,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			if (index < ItemCount)
 			{
 				item.cachedGameObject.SetActive(true);
-				ret = OnDataEvent(index, item);
+				OnDataEvent(index, item, subIndex);
 			}
 			else
 				item.cachedGameObject.SetActive (false);
@@ -1050,8 +1071,6 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 #if UNITY_EDITOR
 	//	LogMgr.Instance.Log(string.Format("get {0:d} data!", index));
 #endif
-
-		return ret;
 	}
 	
 	private bool IsItemVisible(UIWidget item)
@@ -1169,7 +1188,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				{
 					--mItemTopIndex;
 					--mItemBottomIndex;
-					DoGetData(node.Value, mItemTopIndex);
+					RefreshSubItem(node.Value, mItemTopIndex);
 				}
 				isChg = true;
 				if (count == 0)
@@ -1232,7 +1251,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				{
 					++mItemTopIndex;
 					++mItemBottomIndex;
-					DoGetData(node.Value, mItemBottomIndex);
+					RefreshSubItem(node.Value, mItemBottomIndex);
 				}
 				isChg = true;
 				if (count == 0)
@@ -1362,6 +1381,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	public int ItemCount = 0;
 	public int ItemDepth = 0;
 	public bool IsAsynInitData = true;
+	public int SubItemCount = 1;
 
 	// 是否按需显示ScrollBar
 	public bool IsNeetShowScrollBar = false;
