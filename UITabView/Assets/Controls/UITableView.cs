@@ -984,6 +984,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			mScrollView.restrictWithinPanel = true;
 		} else {
 			Cnt += 2;
+			//Cnt += 4;
 			if (mScrollView.restrictWithinPanel) {
 				mMustResetInWith = true;
 				mScrollView.restrictWithinPanel = false;
