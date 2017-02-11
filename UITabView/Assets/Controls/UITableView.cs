@@ -850,6 +850,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		
 		mScrollView.DisableSpring ();
 		mScroll = delta;
+		mIsScroll = true;
 		mScrollIndex = -1;
 		mScrollSpeed = 0;
 	}
