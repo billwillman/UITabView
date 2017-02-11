@@ -226,7 +226,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	void NodeListDoGetData ()
 	{
 		if (IsAsynInitData) {
-			if (mScrollView != null && mScrollView.enabled)
+			if (mScrollView != null)
 			{
 				StopCreateCoroutne ();
 				m_CreateCoroutne = StartCoroutine (NodeListDoGetDataAsync ());
