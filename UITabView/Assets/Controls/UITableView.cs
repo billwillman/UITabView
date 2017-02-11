@@ -656,6 +656,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			mScrollIndex = -1;
 			return;
 		}
+
+		StopCreateCoroutne();
 		
 		// 1.在可滚动范围内
 		int itemTopIndex;
@@ -727,6 +729,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			mIsScroll = false;
 			return;
 		}
+
+		StopCreateCoroutne();
 
 		mScrollView.MoveRelative (offset);
 		float lastScroll = mScroll;
