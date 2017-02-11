@@ -28,5 +28,7 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 		UISprite sp = item.cachedTransform.FindChild("Item").GetComponent<UISprite>();
 		sp.spriteName = "eggs_01";
 		sp.enabled = true;
+		UILabel lb = item.cachedTransform.FindChild("Item/Lb").GetComponent<UILabel>();
+		lb.text = index.ToString();
 	}
 }

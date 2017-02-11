@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{FFFB6BEC-E1F2-83CA-7F93-A33B6598FE47}") = "UITabView", "Assembly-CSharp.csproj", "{B0C0798B-4132-351C-21D6-A140E8C849B7}"
+EndProject
+Project("{FFFB6BEC-E1F2-83CA-7F93-A33B6598FE47}") = "UITabView", "Assembly-CSharp-Editor.csproj", "{59D3362D-33A8-DAC1-B034-61245C284779}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0C0798B-4132-351C-21D6-A140E8C849B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0C0798B-4132-351C-21D6-A140E8C849B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0C0798B-4132-351C-21D6-A140E8C849B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0C0798B-4132-351C-21D6-A140E8C849B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59D3362D-33A8-DAC1-B034-61245C284779}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59D3362D-33A8-DAC1-B034-61245C284779}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59D3362D-33A8-DAC1-B034-61245C284779}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59D3362D-33A8-DAC1-B034-61245C284779}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
