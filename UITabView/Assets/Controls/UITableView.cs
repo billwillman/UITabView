@@ -6,6 +6,8 @@ using UnityEngine;
 public interface ITableViewData
 {
 	void OnTabViewData (int index, UIWidget item, int subIndex);
+
+	void OnTabViewItemSize (int index, UIWidget item);
 }
 
 // TabViewScrollBar接口, 需要让UIScrollView调用
@@ -226,8 +228,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	void NodeListDoGetData ()
 	{
 		if (IsAsynInitData) {
-			if (mScrollView != null)
-			{
+			if (mScrollView != null) {
 				StopCreateCoroutne ();
 				m_CreateCoroutne = StartCoroutine (NodeListDoGetDataAsync ());
 			}
@@ -327,10 +328,31 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		get {
 			if (ItemObject == null)
 				return 0;
-			if (IsHorizontal)
-				return ItemCount * ItemObject.width;
-			else if (IsVertical)
-				return ItemCount * ItemObject.height;
+			if (IsUseTabItemSize && Data != null)
+			{
+				float ret = 0;
+				for (int i = 0; i < ItemCount; ++i)
+				{
+					int w = ItemObject.width;
+					int h = ItemObject.height;
+					Data.OnTabViewItemSize(i, ItemObject);
+					if (IsHorizontal)
+						ret += ItemObject.width;
+					else
+						ret += ItemObject.height;
+					ItemObject.width = w;
+					ItemObject.height = h;
+				}
+
+				return ret;
+			} else
+			{
+				if (IsHorizontal)
+					return ItemCount * ItemObject.width;
+				else if (IsVertical)
+					return ItemCount * ItemObject.height;
+
+			}
 			return 0;
 		}
 	}
@@ -488,7 +510,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				StopCoroutine(m_CreateCoroutne);
 				m_CreateCoroutne = StartCoroutine(RefreshDataAtViewRectAsync());
 			}
-		} else*/ {
+		} else*/
+		{
 			if (mItemList == null || mItemList.Count <= 0) {
 				mItemTopIndex = -1;
 				mItemBottomIndex = -1;
@@ -1164,6 +1187,13 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				Vector2 nOffset = node.Value.pivotOffset;
 				Vector2 lOffset = firstNode.Value.pivotOffset;
 
+				if (/*IsUseTabItemSize &&*/ Data != null) {
+					int newIdx = mItemTopIndex;
+					if (!mIsFirstRun)
+						--newIdx;
+					Data.OnTabViewItemSize (newIdx, node.Value);
+				}
+
 				Vector3 pos = node.Value.cachedTransform.localPosition;
 				if (IsHorizontal) {
 					pos.x = firstNode.Value.cachedTransform.localPosition.x - firstNode.Value.width * lOffset.x - node.Value.width * (1 - nOffset.x);
@@ -1221,6 +1251,14 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 				Vector2 nOffset = node.Value.pivotOffset;
 				Vector2 lOffset = lastNode.Value.pivotOffset;
+
+				if (/*IsUseTabItemSize &&*/ Data != null) {
+					int newIdx = mItemBottomIndex;
+					if (!mIsFirstRun)
+						++newIdx;
+					Data.OnTabViewItemSize (newIdx, node.Value);
+				}
+
 				// 修改位置
 				Vector3 pos = node.Value.cachedTransform.localPosition;
 				if (IsHorizontal) {
@@ -1304,7 +1342,22 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				int subDepth = ItemDepth - widget.depth;
 				NGUITools.AdjustDepth (obj, subDepth);
 				Vector2 offset = widget.pivotOffset;
+
 				if ((last != null) && (last.Value != null)) {
+
+					// 上一个Size
+					if (/*IsUseTabItemSize &&*/ Data != null) {
+						var target = last.Value;
+						var targetIdx = item.Index - 1;
+						Data.OnTabViewItemSize (targetIdx, target);
+						Vector2 targetSize = new Vector2 (target.width, target.height);
+
+						Data.OnTabViewItemSize (item.Index, widget);
+						childSize = new Vector2 (widget.width, widget.height);
+
+						childSize.x = (childSize.x + targetSize.x) / 2f;
+						childSize.y = (childSize.y + targetSize.y) / 2f;
+					}
 
 					if (IsHorizontal) {
 						tPos.x = last.Value.cachedTransform.localPosition.x + childSize.x;
@@ -1314,6 +1367,13 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 						tPos.x = 0;
 					}
 				} else {
+
+					// 自己的Size
+					if (/*IsUseTabItemSize &&*/ Data != null) {
+						Data.OnTabViewItemSize (item.Index, widget);
+						childSize = new Vector2 (widget.width, widget.height);
+					}
+
 					if (IsHorizontal) {
 						tPos.x = -parentSize.x / 2 + childSize.x * offset.x;
 						tPos.y = 0;
@@ -1353,6 +1413,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	public int ItemCount = 0;
 	public int ItemDepth = 0;
 	public bool IsAsynInitData = true;
+	// 是否会动态ItemSize
+	public bool IsUseTabItemSize = false;
 	public int SubItemCount = 1;
 
 	// 是否按需显示ScrollBar
