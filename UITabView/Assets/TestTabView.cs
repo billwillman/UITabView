@@ -25,9 +25,11 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 			//TabView.Scroll(-100);
 	}
 
+	private static readonly int m_SplitCnt = 5;
+
 	public void OnTabViewItemSize(int index, UIWidget item)
 	{
-		if (index != 0 && index%10 == 0)
+		if (index != 0 && index%m_SplitCnt == 0)
 		{
 			item.height = 10;
 		} else {
@@ -39,7 +41,7 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 	{
 		GameObject obj = item.cachedTransform.FindChild("Items").gameObject;
 		GameObject btn = item.cachedTransform.FindChild("Btn").gameObject;
-		if (index != 0 && index%10 == 0)
+		if (index != 0 && index%m_SplitCnt == 0)
 		{
 			btn.SetActive(true);
 			obj.SetActive(false);
