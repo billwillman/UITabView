@@ -27,18 +27,29 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 
 	public void OnTabViewData (int index, UIWidget item, int subIndex)
 	{
+		GameObject obj = item.cachedTransform.FindChild("Items").gameObject;
+		GameObject btn = item.cachedTransform.FindChild("Btn").gameObject;
+		if (index%10 == 0)
+		{
+			btn.SetActive(true);
+			obj.SetActive(false);
+			return;
+		}
+
+		btn.SetActive(false);
+		obj.SetActive(true);
 		int idx = index * 4 + subIndex;
 		if (subIndex == 0)
 		{
-			UISprite sp = item.cachedTransform.FindChild("Item").GetComponent<UISprite>();
+			UISprite sp = item.cachedTransform.FindChild("Items/Item").GetComponent<UISprite>();
 			sp.spriteName = string.Format("dish_0{0:D}", subIndex + 1);
 			sp.enabled = true;
-			UILabel lb = item.cachedTransform.FindChild("Item/Lb").GetComponent<UILabel>();
+			UILabel lb = item.cachedTransform.FindChild("Items/Item/Lb").GetComponent<UILabel>();
 			lb.text = idx.ToString();
 			lb.enabled = true;
 		} else
 		{
-			string name = string.Format("Item ({0:D})", subIndex);
+			string name = string.Format("Items/Item ({0:D})", subIndex);
 			UISprite sp = item.cachedTransform.FindChild(name).GetComponent<UISprite>();
 			sp.spriteName = string.Format("dish_0{0:D}", subIndex + 1);
 			sp.enabled = true;
