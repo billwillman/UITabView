@@ -510,7 +510,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			}
 		} else*/
 		{
-			if (mItemList == null || mItemList.Count <= 0) {
+            if (mItemList == null || mItemList.Count <= 0) {
 				mItemTopIndex = -1;
 				mItemBottomIndex = -1;
 				return;
@@ -527,8 +527,11 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 						mItemTopIndex = 0;
 				}
 			}
-		
-			var node = mItemList.First;
+
+            // 防止正在初始化立马被调用
+            StopCreateCoroutne();
+
+            var node = mItemList.First;
 			int idx = mItemTopIndex;
 			while (node != null && node.Value != null) {
 				// 直到设置完值再返回
