@@ -13,14 +13,14 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 
 	public void OnUpClick()
 	{
-		if (TabView != null)
+        if (TabView != null)
 			TabView.Scroll(500);
 			//TabView.Scroll(100);
 	}
 
 	public void OnDownClick()
 	{
-		if (TabView != null)
+        if (TabView != null)
 			TabView.Scroll(-500);
 			//TabView.Scroll(-100);
 	}

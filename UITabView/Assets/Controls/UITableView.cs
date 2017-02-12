@@ -685,6 +685,12 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		}
 
 		//StopCreateCoroutne();
+
+        if (IsUseTabItemSize && Data != null) {
+#if DEBUG
+            Debug.LogErrorFormat("UITabView TabSize is not same: don't support ScrollIndex");
+#endif
+        }
 		
 		// 1.在可滚动范围内
 		int itemTopIndex;
@@ -701,7 +707,22 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			
 			if (IsHorizontal) {
 				allSize -= mPanel.GetViewSize ().x;
-				float y = itemTopIndex * ItemObject.width;
+
+                float y;
+                /*
+                if (IsUseTabItemSize && Data != null) {
+                    y = 0;
+                    for (int i = 0; i < itemTopIndex; ++i) {
+                        int w = ItemObject.width;
+                        int h = ItemObject.height;
+                        Data.OnTabViewItemSize(i, ItemObject);
+                        y += ItemObject.width;
+                        ItemObject.width = w;
+                        ItemObject.height = h;
+                    }
+                } else*/
+                    y = itemTopIndex * ItemObject.width;
+
 				if (y > allSize)
 					y = allSize;
 				Vector3 offset = new Vector3 (-y, 0, 0);
@@ -710,7 +731,22 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				mScrollView.MoveRelative (offset);
 			} else if (IsVertical) {
 				allSize -= mPanel.GetViewSize ().y;
-				float y = itemTopIndex * ItemObject.height;
+
+                float y;
+                /*
+                if (IsUseTabItemSize && Data != null) {
+                    y = 0;
+                    for (int i = 0; i < itemTopIndex; ++i) {
+                        int w = ItemObject.width;
+                        int h = ItemObject.height;
+                        Data.OnTabViewItemSize(i, ItemObject);
+                        y += ItemObject.height;
+                        ItemObject.width = w;
+                        ItemObject.height = h;
+                    }
+                } else*/
+                    y = itemTopIndex * ItemObject.height;
+
 				if (y > allSize)
 					y = allSize;
 				Vector3 offset = new Vector3 (0, y, 0);
@@ -844,7 +880,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		return true;
 	}*/
 	
-	public void Scroll (float delta)
+    public void Scroll (float delta)
 	{
 		if (mScrollView == null || mPanel == null || ItemCount <= 0 || mItemList == null || mItemList.Count <= 0 || mViewMaxCount >= ItemCount)
 			return;
@@ -901,13 +937,45 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			Index = ItemCount - 1;
 		
 		if (isAnim) {
-			if (IsHorizontal) {
-				float absoluteDistance = Index * ItemObject.width;
+            StopCreateCoroutne();
+            mScrollView.enabled = true;
+
+            if (IsHorizontal) {
+                float absoluteDistance;
+                if (IsUseTabItemSize && Data != null) {
+                    absoluteDistance = 0;
+                    for (int i = 0; i < Index; ++i) {
+                        int w = ItemObject.width;
+                        int h = ItemObject.height;
+
+                        Data.OnTabViewItemSize(i, ItemObject);
+                        absoluteDistance += ItemObject.width;
+
+                        ItemObject.width = w;
+                        ItemObject.height = h;
+                    }
+                } else
+                    absoluteDistance = Index * ItemObject.width;
 				float currDistance = -(mScrollView.transform.localPosition.x - mOrgOffset.x);
 				float relativeDistance = currDistance - absoluteDistance;
 				Scroll (relativeDistance);
 			} else if (IsVertical) {
-				float absoluteDistance = Index * ItemObject.height;
+                float absoluteDistance;
+                if (IsUseTabItemSize && Data != null) {
+                    absoluteDistance = 0;
+                    for (int i = 0; i < Index; ++i) {
+                        int w = ItemObject.width;
+                        int h = ItemObject.height;
+
+                        Data.OnTabViewItemSize(i, ItemObject);
+                        absoluteDistance += ItemObject.height;
+
+                        ItemObject.width = w;
+                        ItemObject.height = h;
+                    }
+                }
+                else
+                    absoluteDistance = Index * ItemObject.height;
 				float currDistance = mScrollView.transform.localPosition.y - mOrgOffset.y;
 				float relativeDistance = currDistance - absoluteDistance;
 				Scroll (relativeDistance);
