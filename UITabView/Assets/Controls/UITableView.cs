@@ -324,11 +324,10 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 #endif
 	}
 
-	protected float AllContentSize {
-		get {
+	protected float AllContentSize(bool isCheckUseItemSize = true) {
 			if (ItemObject == null)
 				return 0;
-			if (IsUseTabItemSize && Data != null)
+		if (isCheckUseItemSize && IsUseTabItemSize && Data != null)
 			{
 				float ret = 0;
 				for (int i = 0; i < ItemCount; ++i)
@@ -354,7 +353,6 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 			}
 			return 0;
-		}
 	}
 
 	private void UpdateScrollBar ()
@@ -374,7 +372,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			return;
 		}
 
-		float all = AllContentSize;
+		float all = AllContentSize(false);
 		if (Mathf.Abs (all) <= float.Epsilon)
 			return;
 
@@ -696,7 +694,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		if (ItemObject != null) {
 			mScrollView.DisableSpring ();
 			
-			float allSize = this.AllContentSize;
+			float allSize = this.AllContentSize();
 			
 			if (IsHorizontal) {
 				allSize -= mPanel.GetViewSize ().x;
@@ -798,7 +796,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			if (mViewMaxCount >= ItemCount)
 				return true;
 			
-			float allSize = this.AllContentSize;
+			float allSize = this.AllContentSize();
 			Vector3 offset = mScrollView.transform.localPosition;
 			if (IsHorizontal) {
 				allSize -= mPanel.GetViewSize ().x;
@@ -861,7 +859,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			} else
 				return;
 		} else if (delta < 0) {
-			float allSize = this.AllContentSize;
+			float allSize = this.AllContentSize();
 			if (IsHorizontal) {
 				allSize -= mPanel.GetViewSize ().x;
 				float maxSize = -mOrgOffset.x + allSize;
