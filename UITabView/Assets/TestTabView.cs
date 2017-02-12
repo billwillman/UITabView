@@ -14,28 +14,39 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 	public void OnUpClick()
 	{
 		if (TabView != null)
-			TabView.ScrollIndex(0);
+			TabView.Scroll(500);
 			//TabView.Scroll(100);
 	}
 
 	public void OnDownClick()
 	{
 		if (TabView != null)
-			TabView.ScrollIndex(100);
+			TabView.Scroll(-500);
 			//TabView.Scroll(-100);
+	}
+
+	public void OnTabViewItemSize(int index, UIWidget item)
+	{
+		if (index != 0 && index%10 == 0)
+		{
+			item.height = 10;
+		} else {
+			item.height = 100;
+		}
 	}
 
 	public void OnTabViewData (int index, UIWidget item, int subIndex)
 	{
 		GameObject obj = item.cachedTransform.FindChild("Items").gameObject;
 		GameObject btn = item.cachedTransform.FindChild("Btn").gameObject;
-		if (index%10 == 0)
+		if (index != 0 && index%10 == 0)
 		{
 			btn.SetActive(true);
 			obj.SetActive(false);
+
 			return;
 		}
-
+			
 		btn.SetActive(false);
 		obj.SetActive(true);
 		int idx = index * 4 + subIndex;
