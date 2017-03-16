@@ -1538,11 +1538,29 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		}
 	}*/
 
-	public UIWidget FirstWidget {
-		get {
+	public LinkedListNode<UIWidget> FirstNode
+	{
+		get
+		{
 			if (mItemList == null || mItemList.Count <= 0)
 				return null;
-			var node = mItemList.First;
+			return mItemList.First;
+		}
+	}
+
+	public LinkedListNode<UIWidget> LastNode
+	{
+		get
+		{
+			if (mItemList == null || mItemList.Count <= 0)
+				return null;
+			return mItemList.Last;
+		}
+	}
+
+	public UIWidget FirstWidget {
+		get {
+			var node = FirstNode;
 			if (node == null)
 				return null;
 			return node.Value;
@@ -1560,9 +1578,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 	public UIWidget LastWidget {
 		get {
-			if (mItemList == null || mItemList.Count <= 0)
-				return null;
-			var node = mItemList.Last;
+			var node = LastNode;
 			if (node == null)
 				return null;
 			return node.Value;
