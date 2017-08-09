@@ -1060,7 +1060,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		UpdateEditor ();
 	}
 
-	public void SetItemCount (int newCount)
+	public void InitItemCount (int newCount)
 	{
 		if (ItemCount == newCount)
 			return;
