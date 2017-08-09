@@ -272,7 +272,9 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			ReCalcCreateItems ();
 			
 			mOrgOffset = mScrollView.transform.localPosition;
-		}
+            mLastOffset = mOrgOffset;
+
+        }
 
 		Check2NoVisible ();
 
@@ -1018,10 +1020,38 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		Scroll (delta);
 	}
 
+    bool CheckIsMoving() {
+        if (mScrollView == null || ItemObject == null)
+            return false;
+
+        float checkOffset;
+        if (IsHorizontal)
+            checkOffset = ItemObject.width;
+        else if (IsVertical)
+            checkOffset = ItemObject.height;
+        else
+            return false;
+
+        if (mIsFirstRun)
+            return true;
+
+        Vector3 currOffset = mScrollView.transform.localPosition;
+        Vector3 delta = currOffset - mLastOffset;
+        checkOffset *= checkOffset;
+        if (delta.sqrMagnitude >= checkOffset) {
+            mLastOffset = currOffset;
+            return true;
+        }
+        return false;
+    }
+
 	void LateUpdate ()
 	{
 		if (!Application.isPlaying)
 			return;
+
+        if (!CheckIsMoving())
+            return;
 
 		refreshItems ();
 		//	UpdateScrollBar ();
@@ -1610,6 +1640,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	private bool mIsFirstRun = true;
 	private int mScrollIndex = -1;
 	private Vector3 mOrgOffset = Vector3.zero;
+    private Vector3 mLastOffset = Vector3.zero;
 	//	private bool mIsFirstUpdate = true;
 	//private Vector2 mLastOffset = Vector2.zero;
 	
