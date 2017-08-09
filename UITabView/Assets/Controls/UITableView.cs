@@ -1024,6 +1024,9 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
         if (mScrollView == null || ItemObject == null)
             return false;
 
+        if (mIsScroll || mScrollIndex >= 0)
+            return true;
+
         float checkOffset;
         if (IsHorizontal)
             checkOffset = ItemObject.width;
