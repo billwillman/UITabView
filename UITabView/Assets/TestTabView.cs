@@ -1,14 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class TestTabView : MonoBehaviour, ITableViewData {
 
 	public UITableView TabView = null;
+    private List<int> m_DataList = new List<int>();
 
 	void Awake()
 	{
-		if (TabView != null)
-			TabView.Data = this;	
+        if (TabView != null) {
+            TabView.InitItemCount(2);
+            TabView.Data = this;
+        }	
 	}
 
 	public void OnUpClick()
@@ -21,24 +25,38 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 	public void OnDownClick()
 	{
         if (TabView != null)
+            TabView.AddItems(10);
+        return;
+        
+        if (TabView != null)
 			TabView.Scroll(-500);
 			//TabView.Scroll(-100);
 	}
 
 	private static readonly int m_SplitCnt = 5;
 
+    
 	public void OnTabViewItemSize(int index, UIWidget item)
 	{
+
+        /*
+
 		if (index != 0 && index%m_SplitCnt == 0)
 		{
 			item.height = 10;
 		} else {
 			item.height = 100;
-		}
-	}
+		}*/
+        item.height = 100;
+    }
 
 	public void OnTabViewData (int index, UIWidget item, int subIndex)
 	{
+
+
+      //  Debug.LogFormat("FillItem: {0:D}", index);
+     //   Debug.LogErrorFormat("FillItem: Index=>{0:D} SubIndex=>{1:D}", index, subIndex);
+
 		GameObject obj = item.cachedTransform.FindChild("Items").gameObject;
 		GameObject btn = item.cachedTransform.FindChild("Btn").gameObject;
 		if (index != 0 && index%m_SplitCnt == 0)

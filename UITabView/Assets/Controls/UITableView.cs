@@ -19,22 +19,28 @@ public interface ITabViewScrollBar
 [RequireComponent (typeof(UIScrollView))]
 public class UITableView: MonoBehaviour, ITabViewScrollBar
 {
-	void Start ()
+    void OnInit() {
+        if (mScrollView == null)
+            mScrollView = GetComponent<UIScrollView>();
+        if (mPanel == null)
+            mPanel = GetComponent<UIPanel>();
+        // 设置TabViewScrollBar接口
+
+        if (mScrollView != null) {
+            mScrollView.TabViewScrollBar = this;
+        }
+
+        if (ItemObject != null) {
+            ItemObject.gameObject.SetActive(false);
+        }
+
+        //	ReCalcCreateItems ();
+    }
+
+    void Start ()
 	{
-		mScrollView = GetComponent<UIScrollView> ();
-		mPanel = GetComponent<UIPanel> ();
-		// 设置TabViewScrollBar接口
-
-		if (mScrollView != null) {
-			mScrollView.TabViewScrollBar = this;
-		}
-		
-		if (ItemObject != null) {
-			ItemObject.gameObject.SetActive (false);
-		}
-
-		//	ReCalcCreateItems ();
-	}
+        OnInit();
+    }
 
 	public void OnScrollViewScrollBarUpdate ()
 	{
@@ -264,7 +270,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				offset.z = 0;
 				offset.x = 0;
 			}
-				
+			
 			mScrollView.MoveRelative (-offset);
 			//	mScrollView.MoveAbsolute(Vector3.zero);
 			ClearItemList ();
@@ -803,11 +809,14 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		mScrollView.MoveRelative (offset);
 		float lastScroll = mScroll;
 		mScroll -= scrollValue;
-		if ((lastScroll > 0 && mScroll < 0) || (lastScroll < 0 || mScroll > 0)) {
+		if ((lastScroll > 0 && mScroll < 0) || (lastScroll < 0 && mScroll > 0)) {
 			mScroll = 0;
 			mIsScroll = false;
 		}
-	}
+
+        CheckScrollBarVisible();
+        UpdateScrollBar();
+    }
 	
 	// 已经滚动到头
 	public bool IsScrollTop {
@@ -882,10 +891,10 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		return true;
 	}*/
 	
-    public void Scroll (float delta)
+    public bool Scroll (float delta)
 	{
 		if (mScrollView == null || mPanel == null || ItemCount <= 0 || mItemList == null || mItemList.Count <= 0 || mViewMaxCount >= ItemCount)
-			return;
+			return false;
 		
 		Vector3 offset = mScrollView.transform.localPosition;
 		if (delta > 0) {
@@ -898,7 +907,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				if (offset.y - delta < mOrgOffset.y)
 					delta = offset.y - mOrgOffset.y;
 			} else
-				return;
+				return false;
 		} else if (delta < 0) {
 			float allSize = this.AllContentSize();
 			if (IsHorizontal) {
@@ -913,18 +922,20 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				if (offset.y - delta > maxSize)
 					delta = offset.y - maxSize;
 			} else
-				return;
+				return false;
 		} else
-			return;
+			return false;
 		
 		if (Mathf.Abs (delta) <= float.Epsilon)
-			return;
+			return false;
 		
 		mScrollView.DisableSpring ();
-		mScroll = delta;
+		mScroll += delta;
 		mIsScroll = true;
 		mScrollIndex = -1;
 		mScrollSpeed = 0;
+
+        return true;
 	}
 
 	// 滚动到位置
@@ -1070,21 +1081,43 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		ItemCount = newCount;
 		if (ItemCount < 0)
 			ItemCount = 0;
-		// 重新刷一次数据
-		mIsFirstRun = true;
-		/*
+        // 重新刷一次数据
+        RefreshData();
+        /*
 		if (refreshAll || mItemList == null || mItemList.Count <= 0)
 			mIsFirstRun = true;
 		else
 		{
 			RefreshDataAtViewRect();
 		}*/
-	}
+    }
 
-	public void RefreshData ()
+	protected void RefreshData ()
 	{
 		mIsFirstRun = true;
-	}
+    }
+
+    private int GetViewMaxItemCount() {
+        if (ItemObject == null || mPanel == null)
+            return 0;
+        if ((!IsHorizontal) && (!IsVertical))
+            return 0;
+        Vector2 size = mPanel.GetViewSize();
+        Vector2 childSize = new Vector2(ItemObject.width, ItemObject.height);
+        if ((Mathf.Abs(size.x) < float.Epsilon) || (Mathf.Abs(size.y) < float.Epsilon) ||
+            (Mathf.Abs(childSize.x) < float.Epsilon) || (Mathf.Abs(childSize.y) < float.Epsilon))
+            return 0;
+
+        int Cnt = 0;
+        if (IsHorizontal) {
+            // 水平
+            Cnt = Mathf.CeilToInt(size.x / childSize.x);
+        } else if (IsVertical) {
+            // 垂直
+            Cnt = Mathf.CeilToInt(size.y / childSize.y);
+        }
+        return Cnt;
+    }
 
 	// 重新计算生成Item缓冲
 	public void ReCalcCreateItems ()
@@ -1094,29 +1127,16 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			return;
 		if ((!IsHorizontal) && (!IsVertical))
 			return;
-	
-		Vector2 size = mPanel.GetViewSize ();
-		Vector2 childSize = new Vector2 (ItemObject.width, ItemObject.height);
-		if ((Mathf.Abs (size.x) < float.Epsilon) || (Mathf.Abs (size.y) < float.Epsilon) ||
-		    (Mathf.Abs (childSize.x) < float.Epsilon) || (Mathf.Abs (childSize.y) < float.Epsilon))
-			return;
 
-
-		int Cnt = 0;
-		if (IsHorizontal) {
-			// 水平
-			Cnt = Mathf.CeilToInt (size.x / childSize.x);
-		} else if (IsVertical) {
-			// 垂直
-			Cnt = Mathf.CeilToInt (size.y / childSize.y);
-		}
-		if (Cnt <= 0)
+        int Cnt = GetViewMaxItemCount();
+        if (Cnt <= 0)
 			return;
 
 		mViewMaxCount = Cnt;
 		if (ItemCount <= Cnt) {
-			Cnt = ItemCount;
-			mMustResetInWith = false;
+            //Cnt = ItemCount;
+            Cnt += 2;
+            mMustResetInWith = mScrollView.restrictWithinPanel;
 			mScrollView.restrictWithinPanel = true;
 		} else {
 			Cnt += 2;
@@ -1141,7 +1161,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		ReCountList (Cnt);
 	}
 
-	public void RemoveAllItems ()
+	protected void RemoveAllItems ()
 	{
 		ReCountList (0);
 		mItemTopIndex = -1;
@@ -1617,6 +1637,53 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			return node.Value;
 		}
 	}
+
+    public void AddItems(int addCount, bool isMoveOffset = true) {
+        if (addCount <= 0)
+            return;
+        for (int i = 0; i < addCount; ++i) {
+            AddItem(isMoveOffset);
+        }
+    }
+
+    public void AddItem(bool isMoveOffset = true) {
+        if (ItemObject == null || mScrollView == null || mItemList == null)
+            return;
+        int index = ItemCount;
+        ItemCount += 1;
+        if (Data != null) {
+            int w = ItemObject.width;
+            int h = ItemObject.height;
+            Data.OnTabViewItemSize(index, ItemObject);
+
+            float offset = 0f;
+            if (IsHorizontal)
+                offset = w;
+            else if (IsVertical)
+                offset = h;
+            ItemObject.width = w;
+            ItemObject.height = h;
+
+            if (Mathf.Abs(offset) > float.Epsilon) {
+
+                if (index >= ItemTopIndex && index <= ItemBottomIndex) {
+                    var node = mItemList.First;
+                    int i = ItemTopIndex;
+                    while (node != null && node.Value != null) {
+                        if (i == index) {
+                            RefreshSubItem(node.Value, index);
+                            break;
+                        }
+                        node = node.Next;
+                        ++i;
+                    }
+                }
+                if (isMoveOffset)
+                    Scroll(-offset);
+                //ScrollIndex(ItemCount - 1);
+            }
+        }
+    }
 
 	public UITabViewItem LastItem {
 		get {
