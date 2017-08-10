@@ -25,7 +25,7 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 	public void OnDownClick()
 	{
         if (TabView != null)
-            TabView.AddItems(10);
+            TabView.AddItem(10, true);
         return;
         
         if (TabView != null)

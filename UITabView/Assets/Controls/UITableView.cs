@@ -1645,14 +1645,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		}
 	}
 
-    public void AddItems(int addCount, bool isMoveOffset = true) {
-        if (addCount <= 0)
-            return;
-        AddItem(addCount, isMoveOffset);
-    }
-
-    public void AddItem(int addCount = 1, bool isMoveOffset = true) {
-        if (addCount < 0 || ItemObject == null || mScrollView == null || mItemList == null)
+    public void AddItem(int addCount = 1, bool isMoveOffset = false) {
+        if (addCount <= 0 || ItemObject == null || mScrollView == null || mItemList == null)
             return;
         int startIndex = ItemCount;
         ItemCount += addCount;
