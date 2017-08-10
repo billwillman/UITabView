@@ -612,9 +612,17 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			RefreshDataAtViewRect();
 		}
 	}*/
-	
-	// 删除当前数据
-	public void RemoveIndex (int index)
+
+    protected bool IsMoveDownOffset 
+    {
+        get {
+            return (mScrollView != null) && (ItemObject != null) &&
+                                (mItemBottomIndex >= ItemCount) && (mViewMaxCount < ItemCount);
+        }
+    }
+
+    // 删除当前数据
+    public void RemoveIndex (int index)
 	{
 		if (index < 0 || index >= ItemCount || mItemList == null || mItemList.Count <= 0 || mViewMaxCount <= 0)
 			return;
@@ -625,13 +633,12 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 		ItemCount = itemCnt;
 
-		bool isMoveDownOffset = (mScrollView != null) && (ItemObject != null) &&
-		                        (mItemBottomIndex >= ItemCount) && (mViewMaxCount < ItemCount);
+        bool isMoveDownOffset = IsMoveDownOffset;
 
-		bool isMoveUpOffset = (mScrollView != null) && (ItemObject != null) &&
-		                      (index < mItemTopIndex) && (mViewMaxCount < ItemCount) &&
-		                      (mItemBottomIndex < ItemCount);
-		if (isMoveDownOffset) {
+        bool isMoveUpOffset = (mScrollView != null) && (ItemObject != null) &&
+                              (index < mItemTopIndex) && (mViewMaxCount < ItemCount) &&
+                              (mItemBottomIndex < ItemCount);
+        if (isMoveDownOffset) {
 			// Scroll Down
 			if (mItemTopIndex == 0 && mItemBottomIndex == ItemCount) {
 				mScrollView.ResetPosition ();
@@ -895,8 +902,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	{
 		if (mScrollView == null || mPanel == null || ItemCount <= 0 || mItemList == null || mItemList.Count <= 0 || mViewMaxCount >= ItemCount)
 			return false;
-		
-		Vector3 offset = mScrollView.transform.localPosition;
+
+        Vector3 offset = mScrollView.transform.localPosition;
 		if (delta > 0) {
 			if (IsHorizontal) {
 				if (offset.x + delta > mOrgOffset.x)
@@ -1641,39 +1648,41 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
     public void AddItems(int addCount, bool isMoveOffset = true) {
         if (addCount <= 0)
             return;
-        for (int i = 0; i < addCount; ++i) {
-            AddItem(isMoveOffset);
-        }
+        AddItem(addCount, isMoveOffset);
     }
 
-    public void AddItem(bool isMoveOffset = true) {
-        if (ItemObject == null || mScrollView == null || mItemList == null)
+    public void AddItem(int addCount = 1, bool isMoveOffset = true) {
+        if (addCount < 0 || ItemObject == null || mScrollView == null || mItemList == null)
             return;
-        int index = ItemCount;
-        ItemCount += 1;
+        int startIndex = ItemCount;
+        ItemCount += addCount;
         if (Data != null) {
-            int w = ItemObject.width;
-            int h = ItemObject.height;
-            Data.OnTabViewItemSize(index, ItemObject);
 
             float offset = 0f;
-            if (IsHorizontal)
-                offset = w;
-            else if (IsVertical)
-                offset = h;
-            ItemObject.width = w;
-            ItemObject.height = h;
+            for (int k = 0; k < addCount; ++k) {
+                int index = startIndex + k;
+                int w = ItemObject.width;
+                int h = ItemObject.height;
+                Data.OnTabViewItemSize(index, ItemObject);
+                if (IsHorizontal)
+                    offset += ItemObject.width;
+                else if (IsVertical)
+                    offset += ItemObject.height;
+                ItemObject.width = w;
+                ItemObject.height = h;
+            }
 
             if (Mathf.Abs(offset) > float.Epsilon) {
 
-                if (index >= ItemTopIndex && index <= ItemBottomIndex) {
+                if (startIndex >= ItemTopIndex && startIndex <= ItemBottomIndex) {
                     var node = mItemList.First;
                     int i = ItemTopIndex;
+                    int endIndex = startIndex + addCount;
                     while (node != null && node.Value != null) {
-                        if (i == index) {
-                            RefreshSubItem(node.Value, index);
+                        if (i >= startIndex && i <= endIndex) {
+                            RefreshSubItem(node.Value, i);
+                        } else if (i > endIndex)
                             break;
-                        }
                         node = node.Next;
                         ++i;
                     }

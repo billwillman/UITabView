@@ -39,21 +39,19 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 	public void OnTabViewItemSize(int index, UIWidget item)
 	{
 
-        /*
 
+        
 		if (index != 0 && index%m_SplitCnt == 0)
 		{
 			item.height = 10;
 		} else {
 			item.height = 100;
-		}*/
-        item.height = 100;
+		}
+       // item.height = 100;
     }
 
 	public void OnTabViewData (int index, UIWidget item, int subIndex)
 	{
-
-
       //  Debug.LogFormat("FillItem: {0:D}", index);
      //   Debug.LogErrorFormat("FillItem: Index=>{0:D} SubIndex=>{1:D}", index, subIndex);
 
