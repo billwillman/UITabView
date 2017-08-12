@@ -29,6 +29,7 @@ public class TestTabView : MonoBehaviour, ITableViewData {
         //  return;
 
         if (TabView != null) {
+            //TabView.AddItem(20);
             TabView.Scroll(-500);
             TabView.Scroll(200);
         }
