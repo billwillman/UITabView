@@ -44,8 +44,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 	public void OnScrollViewScrollBarUpdate ()
 	{
-		if (!mIsFirstRun)
-			Check2NoVisible ();
+	//	if (!mIsFirstRun)
+	//		Check2NoVisible ();
 		UpdateScrollBar ();
 	}
 
@@ -460,17 +460,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 			yield break;
 		}
 
-		if (mItemBottomIndex >= ItemCount) {
-			mItemBottomIndex = ItemCount - 1;
-			if (mItemBottomIndex < 0) {
-				mItemBottomIndex = 0;
-				mItemTopIndex = 0;
-			} else {
-				mItemTopIndex = mItemBottomIndex - mViewMaxCount;
-				if (mItemTopIndex < 0)
-					mItemTopIndex = 0;
-			}
-		}
+        NormalTopIndexAndBottomIndex();
 
 		mScrollView.enabled = false;
 
@@ -507,7 +497,22 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		}
 	}
 
-	public void RefreshDataAtViewRect ()
+    // 归一化
+    private void NormalTopIndexAndBottomIndex() {
+        if (mItemBottomIndex >= ItemCount) {
+            mItemBottomIndex = ItemCount - 1;
+            if (mItemBottomIndex < 0) {
+                mItemBottomIndex = 0;
+                mItemTopIndex = 0;
+            } else {
+                mItemTopIndex = mItemBottomIndex - mViewMaxCount;
+                if (mItemTopIndex < 0)
+                    mItemTopIndex = 0;
+            }
+        }
+    }
+
+	private void RefreshDataAtViewRect ()
 	{
 		/*
 		if (IsAsynInitData) {
@@ -523,18 +528,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 				mItemBottomIndex = -1;
 				return;
 			}
-		
-			if (mItemBottomIndex >= ItemCount) {
-				mItemBottomIndex = ItemCount - 1;
-				if (mItemBottomIndex < 0) {
-					mItemBottomIndex = 0;
-					mItemTopIndex = 0;
-				} else {
-					mItemTopIndex = mItemBottomIndex - mViewMaxCount;
-					if (mItemTopIndex < 0)
-						mItemTopIndex = 0;
-				}
-			}
+
+            NormalTopIndexAndBottomIndex();
 
             // 防止正在初始化立马被调用
             StopCreateCoroutne();
@@ -788,14 +783,25 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		if (mScrollView.isDragging) {
 			mScroll = 0;
 			mIsScroll = false;
-			return;
+            mIsInitScroll = false;
+            return;
 		}
 		
 		if (Mathf.Abs (mScroll) <= float.Epsilon) {
 			mScroll = 0;
 			mIsScroll = false;
-			return;
+            mIsInitScroll = false;
+            return;
 		}
+
+        if (mIsInitScroll) {
+            mIsInitScroll = false;
+            if (!NormalScroll(ref mScroll)) {
+                mScroll = 0;
+                mIsScroll = false;
+                return;
+            }
+        }
 		
 		float deltaTime = Time.unscaledDeltaTime;
 		float scrollValue = Mathf.SmoothDamp (mScroll, 0, ref mScrollSpeed, deltaTime);
@@ -808,6 +814,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		} else {
 			mScroll = 0;
 			mIsScroll = false;
+            mIsInitScroll = false;
 			return;
 		}
 
@@ -819,7 +826,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		if ((lastScroll > 0 && mScroll < 0) || (lastScroll < 0 && mScroll > 0)) {
 			mScroll = 0;
 			mIsScroll = false;
-		}
+            mIsInitScroll = false;
+        }
 
         CheckScrollBarVisible();
         UpdateScrollBar();
@@ -897,56 +905,64 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 		return true;
 	}*/
+
+    private bool NormalScroll(ref float delta) {
+        if (mScrollView == null || mPanel == null || ItemCount <= 0 || mItemList == null || mItemList.Count <= 0 || mViewMaxCount >= ItemCount)
+            return false;
+
+        Vector3 offset = mScrollView.transform.localPosition;
+        delta += mScroll;
+        if (delta > 0) {
+            if (IsHorizontal) {
+                if (offset.x + delta > mOrgOffset.x)
+                    delta = mOrgOffset.x - offset.x;
+
+                delta = -delta;
+            } else if (IsVertical) {
+                if (offset.y - delta < mOrgOffset.y)
+                    delta = offset.y - mOrgOffset.y;
+            } else
+                return false;
+        } else if (delta < 0) {
+            float allSize = this.AllContentSize();
+            if (IsHorizontal) {
+                allSize -= mPanel.GetViewSize().x;
+                float maxSize = -mOrgOffset.x + allSize;
+                if (-offset.x - delta > maxSize)
+                    delta = -(maxSize + offset.x);
+                delta = -delta;
+            } else if (IsVertical) {
+                allSize -= mPanel.GetViewSize().y;
+                float maxSize = mOrgOffset.y + allSize;
+                if (offset.y - delta > maxSize)
+                    delta = offset.y - maxSize;
+            } else
+                return false;
+        } else
+            return false;
+
+        if (Mathf.Abs(delta) <= float.Epsilon)
+            return false;
+        return true;
+    }
 	
     public bool Scroll (float delta)
 	{
-		if (mScrollView == null || mPanel == null || ItemCount <= 0 || mItemList == null || mItemList.Count <= 0 || mViewMaxCount >= ItemCount)
-			return false;
+      //  if (!NormalScroll(ref delta))
+       //     return false;
 
-        Vector3 offset = mScrollView.transform.localPosition;
-		if (delta > 0) {
-			if (IsHorizontal) {
-				if (offset.x + delta > mOrgOffset.x)
-					delta = mOrgOffset.x - offset.x;
-				
-				delta = -delta;
-			} else if (IsVertical) {
-				if (offset.y - delta < mOrgOffset.y)
-					delta = offset.y - mOrgOffset.y;
-			} else
-				return false;
-		} else if (delta < 0) {
-			float allSize = this.AllContentSize();
-			if (IsHorizontal) {
-				allSize -= mPanel.GetViewSize ().x;
-				float maxSize = -mOrgOffset.x + allSize;
-				if (-offset.x - delta > maxSize)
-					delta = -(maxSize + offset.x);
-				delta = -delta;
-			} else if (IsVertical) {
-				allSize -= mPanel.GetViewSize ().y;
-				float maxSize = mOrgOffset.y + allSize;
-				if (offset.y - delta > maxSize)
-					delta = offset.y - maxSize;
-			} else
-				return false;
-		} else
-			return false;
-		
-		if (Mathf.Abs (delta) <= float.Epsilon)
-			return false;
-		
 		mScrollView.DisableSpring ();
 		mScroll += delta;
 		mIsScroll = true;
 		mScrollIndex = -1;
 		mScrollSpeed = 0;
+        mIsInitScroll = true;
 
         return true;
 	}
 
-	// 滚动到位置
-	public void ScrollIndex (int Index, bool isAnim = false)
+	// 滚动到位置(暂时屏蔽这个方法，有问题)
+	private void ScrollIndex (int Index, bool isAnim = false)
 	{
 		if (ItemCount <= 0 || ItemObject == null || mScrollView == null)
 			return;
@@ -1005,9 +1021,9 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		
 			mScroll = 0;
 			mIsScroll = false;
-			
-			
-		}
+            mIsInitScroll = false;
+
+        }
 	}
 
 	public void ScrollTopItemCount (int cnt)
@@ -1046,11 +1062,17 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
             return true;
 
         float checkOffset;
-        if (IsHorizontal)
-            checkOffset = ItemObject.width;
-        else if (IsVertical)
-            checkOffset = ItemObject.height;
-        else
+        if (IsHorizontal) {
+            if (!IsUseTabItemSize)
+                checkOffset = ((float)ItemObject.width) / 2f;
+            else
+                checkOffset = ItemObject.width;
+        } else if (IsVertical) {
+            if (!IsUseTabItemSize)
+                checkOffset = ((float)ItemObject.height) / 2f;
+            else
+                checkOffset = ItemObject.height;
+        } else
             return false;
 
         if (mIsFirstRun)
@@ -1061,8 +1083,11 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
         checkOffset *= checkOffset;
         if (delta.sqrMagnitude >= checkOffset) {
             mLastOffset = currOffset;
+            mCurrentOffsetDelta = delta;
             return true;
         }
+
+        mCurrentOffsetDelta = Vector3.zero;
         return false;
     }
 
@@ -1246,36 +1271,47 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		LinkedListNode<UIWidget> node2 = node1.Next;
 		if ((node1.Value == null) || (node2.Value == null))
 			return;
-
 		if (mItemBottomIndex + 1 < ItemCount) {
-			while ((node1 != null) && (node1.Value != null) && (node2 != null) && (node2.Value != null) &&
-			       (!IsItemVisible (node1.Value)) && (!IsItemVisible (node2.Value))) {
-				if ((IsHorizontal && (node1.Value.cachedTransform.position.x < -float.Epsilon)) ||
-				    (IsVertical && (node1.Value.cachedTransform.position.y > float.Epsilon))) {
-					if (!ExpandMoveLast (1))
-						break;
-					node1 = mItemList.First;
-					node2 = node1.Next;
-				} else
-					break;
-			}
+
+            bool isMoveExpandLast = (IsHorizontal && mCurrentOffsetDelta.x < -float.Epsilon) ||
+                                    (IsVertical && mCurrentOffsetDelta.y > float.Epsilon) ||
+                                    (mIsScroll && mScroll < -float.Epsilon);
+
+            if (isMoveExpandLast) {
+                while ((node1 != null) && (node1.Value != null) && (node2 != null) && (node2.Value != null) &&
+                       (!IsItemVisible(node1.Value)) && (!IsItemVisible(node2.Value))) {
+                    if ((IsHorizontal && (node1.Value.cachedTransform.position.x < -float.Epsilon)) ||
+                        (IsVertical && (node1.Value.cachedTransform.position.y > float.Epsilon))) {
+                        if (!ExpandMoveLast(1))
+                            break;
+                        node1 = mItemList.First;
+                        node2 = node1.Next;
+                    } else
+                        break;
+                }
+            }
 		}
 
 		node1 = mItemList.Last;
 		node2 = node1.Previous;
 		if (mItemTopIndex > 0) {
-			while (
-				(node1 != null) && (node1.Value != null) && (node2 != null) && (node2.Value != null) &&
-				(!IsItemVisible (node1.Value)) && (!IsItemVisible (node2.Value))) {
-				if ((IsHorizontal && (node1.Value.cachedTransform.position.x > float.Epsilon)) ||
-				    (IsVertical && (node1.Value.cachedTransform.position.y < -float.Epsilon))) {
-					if (!ExpandMoveFirst (1))
-						break;
-					node1 = mItemList.Last;
-					node2 = node1.Previous;
-				} else
-					break;
-			}
+            bool isMoveFirst = (IsHorizontal && mCurrentOffsetDelta.x > float.Epsilon) ||
+                                    (IsVertical && mCurrentOffsetDelta.y < -float.Epsilon) ||
+                                    (mIsScroll && mScroll > float.Epsilon);
+            if (isMoveFirst) {
+                while (
+                    (node1 != null) && (node1.Value != null) && (node2 != null) && (node2.Value != null) &&
+                    (!IsItemVisible(node1.Value)) && (!IsItemVisible(node2.Value))) {
+                    if ((IsHorizontal && (node1.Value.cachedTransform.position.x > float.Epsilon)) ||
+                        (IsVertical && (node1.Value.cachedTransform.position.y < -float.Epsilon))) {
+                        if (!ExpandMoveFirst(1))
+                            break;
+                        node1 = mItemList.Last;
+                        node2 = node1.Previous;
+                    } else
+                        break;
+                }
+            }
 		}
 
 		if (mMustResetInWith) {
@@ -1714,11 +1750,13 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	private int mScrollIndex = -1;
 	private Vector3 mOrgOffset = Vector3.zero;
     private Vector3 mLastOffset = Vector3.zero;
+    private Vector3 mCurrentOffsetDelta = Vector3.zero;
 	//	private bool mIsFirstUpdate = true;
 	//private Vector2 mLastOffset = Vector2.zero;
 	
 	// 滚动相关
 	private bool mIsScroll = false;
+    private bool mIsInitScroll = false;
 	private float mScroll = 0.0f;
 	private float mScrollSpeed = 0.0f;
 

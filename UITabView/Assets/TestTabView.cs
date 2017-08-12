@@ -10,7 +10,7 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 	void Awake()
 	{
         if (TabView != null) {
-            TabView.InitItemCount(2);
+            TabView.InitItemCount(200);
             TabView.Data = this;
         }	
 	}
@@ -24,14 +24,18 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 
 	public void OnDownClick()
 	{
-        if (TabView != null)
-            TabView.AddItem(10, true);
-        return;
-        
-        if (TabView != null)
-			TabView.Scroll(-500);
-			//TabView.Scroll(-100);
-	}
+        // if (TabView != null)
+        //     TabView.AddItem(100, true);
+        //  return;
+
+        if (TabView != null) {
+            TabView.Scroll(-500);
+            TabView.Scroll(200);
+        }
+           // TabView.RemoveIndex(10);
+           // TabView.Scroll(-29496);
+           //TabView.Scroll(-100);
+    }
 
 	private static readonly int m_SplitCnt = 5;
 
@@ -40,20 +44,23 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 	{
 
 
-        
+        return;
+
 		if (index != 0 && index%m_SplitCnt == 0)
 		{
 			item.height = 10;
 		} else {
 			item.height = 100;
 		}
+        
        // item.height = 100;
     }
 
 	public void OnTabViewData (int index, UIWidget item, int subIndex)
 	{
-      //  Debug.LogFormat("FillItem: {0:D}", index);
-     //   Debug.LogErrorFormat("FillItem: Index=>{0:D} SubIndex=>{1:D}", index, subIndex);
+     //   if (subIndex == 0)
+      //       Debug.LogFormat("FillItem: {0:D}", index);
+   //     Debug.LogErrorFormat("FillItem: Index=>{0:D} SubIndex=>{1:D}", index, subIndex);
 
 		GameObject obj = item.cachedTransform.FindChild("Items").gameObject;
 		GameObject btn = item.cachedTransform.FindChild("Btn").gameObject;
@@ -73,18 +80,18 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 			UISprite sp = item.cachedTransform.FindChild("Items/Item").GetComponent<UISprite>();
 			sp.spriteName = string.Format("dish_0{0:D}", subIndex + 1);
 			sp.enabled = true;
-			UILabel lb = item.cachedTransform.FindChild("Items/Item/Lb").GetComponent<UILabel>();
-			lb.text = idx.ToString();
-			lb.enabled = true;
+		//	UILabel lb = item.cachedTransform.FindChild("Items/Item/Lb").GetComponent<UILabel>();
+		//	lb.text = idx.ToString();
+		//	lb.enabled = true;
 		} else
 		{
 			string name = string.Format("Items/Item ({0:D})", subIndex);
 			UISprite sp = item.cachedTransform.FindChild(name).GetComponent<UISprite>();
 			sp.spriteName = string.Format("dish_0{0:D}", subIndex + 1);
 			sp.enabled = true;
-			UILabel lb = item.cachedTransform.FindChild(string.Format("{0}/Lb", name)).GetComponent<UILabel>();
-			lb.text = idx.ToString();
-			lb.enabled = true;
+		//	UILabel lb = item.cachedTransform.FindChild(string.Format("{0}/Lb", name)).GetComponent<UILabel>();
+		//	lb.text = idx.ToString();
+		//	lb.enabled = true;
 		}
 	}
 }
