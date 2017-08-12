@@ -43,9 +43,6 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 	public void OnTabViewItemSize(int index, UIWidget item)
 	{
 
-
-        return;
-
 		if (index != 0 && index%m_SplitCnt == 0)
 		{
 			item.height = 10;
