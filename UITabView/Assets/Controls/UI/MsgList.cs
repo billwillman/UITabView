@@ -8,7 +8,7 @@ namespace NsLib.UI {
     using LRESULT = Int64;
 
     // 消息节点
-    public class MsgNode {
+    internal class MsgNode {
 
         internal MsgNode(long msgId, System.Object obj = null, long wParam = 0, long lParam = 0) {
             Msg = msgId;
@@ -46,7 +46,7 @@ namespace NsLib.UI {
 
 
     // 消息队列
-    public class MsgList {
+    internal class MsgList {
 
         public MsgNode CreateMsg(long msgId, System.Object obj = null, long wParam = 0, long lParam = 0) {
             MsgNode ret = CreateMsgNode(msgId, obj, wParam, lParam);
