@@ -21,6 +21,11 @@ namespace NsLib.UI.Message {
             return null;
         }
 
+        public IPageLoop FindPage(HWND handle) {
+            var handler = GetMsgHandler(handle);
+            return handler as IPageLoop;
+        }
+
         // 系统页
         protected Dictionary<HWND, IPageLoop> m_PageMap = new Dictionary<HWND, IPageLoop>();
     }

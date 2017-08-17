@@ -11,12 +11,6 @@ namespace NsLib.UI {
     public sealed class UIManager: MsgCenter {
 
         // 打开界面
-
-        // 查找界面
-        public IPageLoop FindPage(HWND handle) {
-            var handler = GetMsgHandler(handle);
-            return handler as IPageLoop;
-        }
         
 
         /* ---------Static区域--------- */
