@@ -48,6 +48,13 @@ namespace NsLib.UI.Message {
 
     /* 主循环接口 */
 
+    /*
+     * 一个界面只有一个PageLoop，但会有多个Page，可以拆分多个Page
+     */
+    public interface IPage {
+
+    }
+
     public abstract class IPageLoop: MonoBehaviour, IPageMsgHandler {
         // 更新
         public virtual void Update() {
