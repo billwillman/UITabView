@@ -11,10 +11,10 @@ namespace NsLib.UI {
     internal class MsgNode {
 
         internal MsgNode(long msgId, System.Object obj = null, long wParam = 0, long lParam = 0) {
-            Msg = msgId;
-            Obj = obj;
-            wParam = wParam;
-            lParam = lParam;
+            this.Msg = msgId;
+            this.Obj = obj;
+            this.wParam = wParam;
+            this.lParam = lParam;
             Node = new LinkedListNode<MsgNode>(this);
         }
 
@@ -48,14 +48,27 @@ namespace NsLib.UI {
     // 消息队列
     internal class MsgList {
 
+        // 创建消息
         public MsgNode CreateMsg(long msgId, System.Object obj = null, long wParam = 0, long lParam = 0) {
             MsgNode ret = CreateMsgNode(msgId, obj, wParam, lParam);
+            if (ret != null)
+                m_MsgList.AddLast(ret);
             return ret;
         }
 
+        public MsgNode PopMsg() {
+            var node = m_MsgList.First;
+            if (node != null)
+                m_MsgList.Remove(node);
+            return node.Value;
+        }
+
+        // 删除消息
         public void DestroyMsg(MsgNode node) {
             if (node == null)
                 return;
+            if (node.Node != null && node.Node.List == m_MsgList)
+                m_MsgList.Remove(node.Node);
             DestroyMsgNode(node);
         }
 
