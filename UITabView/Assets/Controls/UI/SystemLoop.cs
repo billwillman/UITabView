@@ -26,6 +26,14 @@ namespace NsLib.UI.Message {
             return handler as IPageLoop;
         }
 
+        // 增加Page
+        protected bool AddPage(HWND handle, IPageLoop page) {
+            if (string.IsNullOrEmpty(handle))
+                return false;
+            m_PageMap[handle] = page;
+            return true;
+        }
+
         // 系统页
         protected Dictionary<HWND, IPageLoop> m_PageMap = new Dictionary<HWND, IPageLoop>();
     }
