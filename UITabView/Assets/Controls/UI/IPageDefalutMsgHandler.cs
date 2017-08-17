@@ -21,7 +21,7 @@ namespace NsLib.UI.Message {
         public static readonly LRESULT OK = 0;
     }
 
-    public interface IPageDefaultMsgHandler {
+    public interface IPageMsgHandler {
         // 界面打开
         void OnShow();
         // 界面关闭
@@ -48,7 +48,7 @@ namespace NsLib.UI.Message {
 
     /* 主循环接口 */
 
-    public abstract class IPageLoop: MonoBehaviour, IPageDefaultMsgHandler {
+    public abstract class IPageLoop: MonoBehaviour, IPageMsgHandler {
         // 更新
         public virtual void Update() {
             var msgNode = m_MsgList.PopMsg();
@@ -116,6 +116,6 @@ namespace NsLib.UI.Message {
 
     // 系统循环
     public abstract class ISystemLoop : MonoBehaviour, IMsgCenterData {
-        public abstract IPageDefaultMsgHandler GetMsgHandler(HWND handle);
+        public abstract IPageMsgHandler GetMsgHandler(HWND handle);
     }
 }

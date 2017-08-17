@@ -8,7 +8,7 @@ namespace NsLib.UI.Message {
     // 获得消息中心接口需要获得数据
     public interface IMsgCenterData {
         // 根据HWND获得窗体消息处理
-        IPageDefaultMsgHandler GetMsgHandler(HWND handle);
+        IPageMsgHandler GetMsgHandler(HWND handle);
     }
 
     // 消息中心
@@ -17,7 +17,7 @@ namespace NsLib.UI.Message {
         // 发送消息等待返回
         public virtual LRESULT SendMsg(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0) {
 
-            IPageDefaultMsgHandler handler = GetMsgHandler(handle);
+            IPageMsgHandler handler = GetMsgHandler(handle);
             if (handler == null) {
                 return LRESULT_VALUE.FAIL;
             }
@@ -29,7 +29,7 @@ namespace NsLib.UI.Message {
         // 发送消息不等待返回
         public virtual bool PostMsg(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0) {
 
-            IPageDefaultMsgHandler handler = GetMsgHandler(handle);
+            IPageMsgHandler handler = GetMsgHandler(handle);
             if (handler == null)
                 return false;
 
