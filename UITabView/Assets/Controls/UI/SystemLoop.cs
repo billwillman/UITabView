@@ -34,6 +34,13 @@ namespace NsLib.UI.Message {
             return true;
         }
 
+        protected void RemovePage(HWND handle) {
+            if (string.IsNullOrEmpty(handle))
+                return;
+            if (m_PageMap.ContainsKey(handle))
+                m_PageMap.Remove(handle);
+        }
+
         // 系统页
         protected Dictionary<HWND, IPageLoop> m_PageMap = new Dictionary<HWND, IPageLoop>();
     }
