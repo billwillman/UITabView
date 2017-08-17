@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace NsLib.UI {
+namespace NsLib.UI.Message {
 
     using HWND = String;
     using LRESULT = Int64;
@@ -40,9 +40,9 @@ namespace NsLib.UI {
     // Page消息分发器
     public interface IPageMsgDispatch {
         // 发送消息等待返回
-        LRESULT SendMessage(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0);
+        LRESULT SendMsg(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0);
         // 发送消息不等待返回
-        bool PostMessage(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0);
+        bool PostMsg(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0);
         
     }
 

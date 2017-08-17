@@ -70,9 +70,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Controls\UI\IPageDefalutMsgHandler.cs" />
+    <Compile Include="Assets\Controls\UI\MsgCenter.cs" />
     <Compile Include="Assets\Controls\UI\MsgList.cs" />
-    <Compile Include="Assets\Controls\UI\PageLoop.cs" />
     <Compile Include="Assets\Controls\UI\SystemLoop.cs" />
+    <Compile Include="Assets\Controls\UI\UIManager.cs" />
     <Compile Include="Assets\Controls\UIDesignBase.cs" />
     <Compile Include="Assets\Controls\UIDesignPanel.cs" />
     <Compile Include="Assets\Controls\UIDesignScrollView.cs" />

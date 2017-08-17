@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NsLib.UI {
+namespace NsLib.UI.Message {
 
     using HWND = String;
     using LRESULT = Int64;
@@ -12,20 +12,12 @@ namespace NsLib.UI {
     }
 
     // 消息中心
-    public class MsgCenter: IPageMsgDispatch {
-
-        private IMsgCenterData m_CenterData = null;
-
-        public MsgCenter(IMsgCenterData centerData) {
-            m_CenterData = centerData;
-        }
+    public class MsgCenter: SystemLoop, IPageMsgDispatch {
 
         // 发送消息等待返回
-        public virtual LRESULT SendMessage(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0) {
-            if (m_CenterData == null)
-                return LRESULT_VALUE.FAIL;
+        public virtual LRESULT SendMsg(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0) {
 
-            IPageDefaultMsgHandler handler = m_CenterData.GetMsgHandler(handle);
+            IPageDefaultMsgHandler handler = GetMsgHandler(handle);
             if (handler == null) {
                 return LRESULT_VALUE.FAIL;
             }
@@ -35,11 +27,9 @@ namespace NsLib.UI {
         }
 
         // 发送消息不等待返回
-        public virtual bool PostMessage(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0) {
-            if (m_CenterData == null)
-                return false;
+        public virtual bool PostMsg(HWND handle, long msg, System.Object obj = null, long wParam = 0, long lParam = 0) {
 
-            IPageDefaultMsgHandler handler = m_CenterData.GetMsgHandler(handle);
+            IPageDefaultMsgHandler handler = GetMsgHandler(handle);
             if (handler == null)
                 return false;
 

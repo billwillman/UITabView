@@ -2,13 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace NsLib.UI {
+namespace NsLib.UI.Message {
 
     using HWND = String;
     using LRESULT = Int64;
 
     // 系统循环
-    public sealed class SystemLoop: ISystemLoop {
+    public class SystemLoop: ISystemLoop {
 
         public override IPageDefaultMsgHandler GetMsgHandler(HWND handle) {
             IPageLoop page;
@@ -22,7 +22,7 @@ namespace NsLib.UI {
         }
 
         // 系统页
-        private Dictionary<HWND, IPageLoop> m_PageMap = new Dictionary<HWND, IPageLoop>();
+        protected Dictionary<HWND, IPageLoop> m_PageMap = new Dictionary<HWND, IPageLoop>();
     }
 
 }

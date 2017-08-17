@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace NsLib.UI {
+namespace NsLib.UI.Message {
 
     using HWND = String;
     using LRESULT = Int64;
