@@ -51,7 +51,11 @@ namespace NsLib.UI {
     public abstract class IPageLoop: MonoBehaviour, IPageDefaultMsgHandler {
         // 更新
         public virtual void Update() {
-
+            var msgNode = m_MsgList.PopMsg();
+            if (msgNode != null) {
+                OnMsg(msgNode);
+                m_MsgList.DestroyMsg(msgNode);
+            }
         }
         
         public virtual void OnShow() { }
@@ -98,6 +102,12 @@ namespace NsLib.UI {
             }
 
             return ret;
+        }
+
+        private LRESULT OnMsg(MsgNode msgNode) {
+            if (msgNode == null)
+                return LRESULT_VALUE.FAIL;
+            return OnMsg(msgNode.Msg, msgNode.Obj, msgNode.wParam, msgNode.lParam);
         }
 
         private MsgList m_MsgList = new MsgList();

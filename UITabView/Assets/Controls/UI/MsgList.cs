@@ -58,9 +58,11 @@ namespace NsLib.UI {
 
         public MsgNode PopMsg() {
             var node = m_MsgList.First;
-            if (node != null)
+            if (node != null) {
                 m_MsgList.Remove(node);
-            return node.Value;
+                return node.Value;
+            }
+            return null;
         }
 
         // 删除消息
