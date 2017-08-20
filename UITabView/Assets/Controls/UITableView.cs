@@ -908,7 +908,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	}*/
 
     private bool NormalScroll(ref float delta) {
-        if (mScrollView == null || mPanel == null || ItemCount <= 0 || mItemList == null || mItemList.Count <= 0 || mViewMaxCount >= ItemCount)
+        if (mScrollView == null || mPanel == null || ItemCount <= 0 || mItemList == null || mItemList.Count <= 0 
+            || mViewMaxCount >= ItemCount)
             return false;
 
         Vector3 offset = mScrollView.transform.localPosition;

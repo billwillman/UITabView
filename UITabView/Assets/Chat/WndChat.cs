@@ -53,6 +53,6 @@ public class WndChat : MonoBehaviour, ITableViewData {
         
         ChatDataManager.Instance.AddChat (string.Empty, text, "123");
         m_ChatSize.Add (100);
-        m_ChatView.AddItem ();
+        m_ChatView.AddItem (1, true);
     }
 }
