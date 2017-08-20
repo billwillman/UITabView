@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class WndChat : MonoBehaviour, ITableViewData {
 
     private UITableView m_ChatView = null;
     private UIInput m_InputView = null;
+    private List<int> m_ChatSize = new List<int> ();
 
     void Start()
     {
@@ -25,22 +27,21 @@ public class WndChat : MonoBehaviour, ITableViewData {
             var trans = item.cachedTransform;
             UILabel lb = trans.FindChild ("Label").GetComponent<UILabel> ();
             lb.text = data.Text;
+            int height = (int)(lb.height - lb.cachedTransform.localPosition.y);
+            if (height < 100)
+                height = 100;
+            m_ChatSize [index] = height;
         }
     }
 
     public void OnTabViewItemSize (int index, UIWidget item)
     {
-       // Debug.Log ("ItemSize");
-        if (ChatDataManager.Instance.ChatCount <= 0)
+        if (index >= m_ChatSize.Count)
             return;
+
+        item.height = m_ChatSize [index];
         
-        var trans = item.cachedTransform;
-        var lb = trans.FindChild ("Label").GetComponent<UILabel>();
-        int height = (int)(lb.height + lb.cachedTransform.localPosition.y);
-        if (height < 100)
-            item.height = 100;
-        else
-            item.height = height;
+       
     }
 
     public void OnBtnSendClick()
@@ -51,6 +52,7 @@ public class WndChat : MonoBehaviour, ITableViewData {
             return;
         
         ChatDataManager.Instance.AddChat (string.Empty, text, "123");
+        m_ChatSize.Add (100);
         m_ChatView.AddItem ();
     }
 }

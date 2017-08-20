@@ -1579,7 +1579,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 		mScrollView.ResetPosition ();
 	}
-
+        
     // 再调整一次位置
     private void BuildFirstItemPos()
     {
@@ -1731,13 +1731,32 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 		}
 	}
 
+    private LinkedListNode<UIWidget> GetTabViewItem(int index)
+    {
+        if (index < 0 || index >= mItemList.Count)
+            return null;
+        int i = 0;
+        var ret = mItemList.First;
+        if (i == index)
+            return ret;
+        while (ret != null) {
+            ret = ret.Next;
+            ++i;
+            if (i == index)
+                return ret;
+        }
+
+        return ret;
+    }
+
     public void AddItem(int addCount = 1, bool isMoveOffset = false) {
         if (addCount <= 0 || ItemObject == null || mScrollView == null || mItemList == null)
             return;
+        
         int startIndex = ItemCount;
         ItemCount += addCount;
         if (Data != null) {
-
+            bool isRefresh = false;
             if (startIndex >= ItemTopIndex && startIndex <= ItemBottomIndex) {
                 var node = mItemList.First;
                 int i = ItemTopIndex;
@@ -1745,6 +1764,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
                 while (node != null && node.Value != null) {
                     if (i >= startIndex && i <= endIndex) {
                         RefreshSubItem(node.Value, i);
+                        isRefresh = true;
                     } else if (i > endIndex)
                         break;
                     node = node.Next;
@@ -1752,7 +1772,20 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
                 }
             }
 
-            bool isMove = isMoveOffset || startIndex == mItemBottomIndex + 1;
+
+            LinkedListNode<UIWidget> preNode = null;
+            LinkedListNode<UIWidget> curNode = null;
+            isRefresh = isRefresh && startIndex <= ItemViewMaxCount + 1;
+            if (isRefresh) {
+                preNode = GetTabViewItem (startIndex - 1);
+                if (preNode == null)
+                    curNode = GetTabViewItem (startIndex);
+                else
+                    curNode = preNode.Next;
+            }
+
+            bool isEnd = startIndex == mItemBottomIndex + 1;
+            bool isMove = isMoveOffset || isEnd || isRefresh;
             if (isMove) {
                 float offset = 0f;
 
@@ -1761,30 +1794,57 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
                     int w = ItemObject.width;
                     int h = ItemObject.height;
                     Data.OnTabViewItemSize (index, ItemObject);
+                    int curW = ItemObject.width;
+                    int curH = ItemObject.height;
                     if (IsHorizontal)
-                        offset += ItemObject.width;
+                        offset += curW;
                     else if (IsVertical)
-                        offset += ItemObject.height;
+                        offset += curH;
                     ItemObject.width = w;
                     ItemObject.height = h;
+
+                    if (curNode != null) {
+                        var widget = curNode.Value;
+                        widget.width = curW;
+                        widget.height = curH;
+
+                        if (preNode != null) {
+                            Vector2 off = widget.pivotOffset;
+                            Vector2 preOff = preNode.Value.pivotOffset;
+
+                            // 修改位置
+                            Vector3 pos = widget.cachedTransform.localPosition;
+                            if (IsHorizontal) {
+                                pos.x = preNode.Value.cachedTransform.localPosition.x + preNode.Value.width * (1 - preOff.x) + curW * off.x;
+                            } else if (IsVertical) {
+                                pos.y = preNode.Value.cachedTransform.localPosition.y - preNode.Value.height * preOff.y - curH * (1.0f - off.y);
+                            }
+                            widget.cachedTransform.localPosition = pos;
+
+
+                        }
+
+                        preNode = curNode;
+                        curNode = curNode.Next;
+                    }
                 }
             
 
                 if (Mathf.Abs (offset) > float.Epsilon) {
+                    
                     if (isMoveOffset) {
                         Scroll (-offset);
-                    } else if (isMove) {
+                    } else if (isEnd) {
+                      //  return;
                         // 优化用, Scroll用于非对称SIZE还是比较消耗效率
                         //说明startIndex == mItemBottomIndex + 1
                         ExpandMoveLast(1);
-
-
                         Vector3 off = Vector3.zero;
                         if (IsHorizontal)
                             off.x = offset;
                         else if (IsVertical)
                             off.y = offset;
-                        
+
                         mScrollView.DisableSpring ();
                         mScrollView.MoveRelative (off);
                     }
