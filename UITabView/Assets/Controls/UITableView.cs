@@ -1156,7 +1156,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	public void ReCalcCreateItems ()
 	{
 		mViewMaxCount = 0;
-		if ((ItemObject == null) || (ItemCount <= 0))
+		if ((ItemObject == null))
 			return;
 		if ((!IsHorizontal) && (!IsVertical))
 			return;
@@ -1527,10 +1527,12 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 					if (/*IsUseTabItemSize &&*/ Data != null) {
 						var target = last.Value;
 						var targetIdx = item.Index - 1;
-						Data.OnTabViewItemSize (targetIdx, target);
+                        if (targetIdx < ItemCount)
+						    Data.OnTabViewItemSize (targetIdx, target);
 						Vector2 targetSize = new Vector2 (target.width, target.height);
 
-						Data.OnTabViewItemSize (item.Index, widget);
+                        if (item.Index < ItemCount)
+						    Data.OnTabViewItemSize (item.Index, widget);
 						childSize = new Vector2 (widget.width, widget.height);
 
 						childSize.x = (childSize.x + targetSize.x) / 2f;
@@ -1548,7 +1550,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 
 					// 自己的Size
 					if (/*IsUseTabItemSize &&*/ Data != null) {
-						Data.OnTabViewItemSize (item.Index, widget);
+                        if (item.Index < ItemCount)
+						    Data.OnTabViewItemSize (item.Index, widget);
 						childSize = new Vector2 (widget.width, widget.height);
 					}
 
@@ -1556,7 +1559,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 						tPos.x = -parentSize.x / 2 + childSize.x * offset.x;
 						tPos.y = 0;
 					} else {
-						tPos.y = parentSize.y / 2 - childSize.y * offset.y;
+                        tPos.y = parentSize.y / 2 - childSize.y * (1.0f - offset.y);
 						tPos.x = 0;
 					}
 				}
@@ -1589,7 +1592,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
         while (node != null) {
             UIWidget widget = node.Value;
             UITabViewItem item = widget.GetComponent<UITabViewItem> ();
-            Data.OnTabViewItemSize (item.Index, widget);
+            if (item.Index < ItemCount)
+                Data.OnTabViewItemSize (item.Index, widget);
             Vector2 childSize = new Vector2 (widget.width, widget.height);
             Vector2 offset = widget.pivotOffset;
             Vector2 realPos;
@@ -1598,7 +1602,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
                 realPos.y = 0;
                 tPos.x += childSize.x;
             } else {
-                realPos.y = tPos.y - childSize.y * offset.y;
+                realPos.y = tPos.y - childSize.y * (1.0f - offset.y);
                 realPos.x = 0;
                 tPos.y -= childSize.y;
             }
@@ -1623,7 +1627,7 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
 	public UIWidget ItemObject = null;
 	public int ItemCount = 0;
 	public int ItemDepth = 0;
-	public bool IsAsynInitData = true;
+    public bool IsAsynInitData = false;
 	// 是否会动态ItemSize
 	public bool IsUseTabItemSize = false;
 	public int SubItemCount = 1;
@@ -1748,26 +1752,45 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
                 }
             }
 
-            float offset = 0f;
-            for (int k = 0; k < addCount; ++k) {
-                int index = startIndex + k;
-                int w = ItemObject.width;
-                int h = ItemObject.height;
-                Data.OnTabViewItemSize(index, ItemObject);
-                if (IsHorizontal)
-                    offset += ItemObject.width;
-                else if (IsVertical)
-                    offset += ItemObject.height;
-                ItemObject.width = w;
-                ItemObject.height = h;
-            }
+            bool isMove = isMoveOffset || startIndex == mItemBottomIndex + 1;
+            if (isMove) {
+                float offset = 0f;
 
-            if (Mathf.Abs(offset) > float.Epsilon) {
+                for (int k = 0; k < addCount; ++k) {
+                    int index = startIndex + k;
+                    int w = ItemObject.width;
+                    int h = ItemObject.height;
+                    Data.OnTabViewItemSize (index, ItemObject);
+                    if (IsHorizontal)
+                        offset += ItemObject.width;
+                    else if (IsVertical)
+                        offset += ItemObject.height;
+                    ItemObject.width = w;
+                    ItemObject.height = h;
+                }
+            
+
+                if (Mathf.Abs (offset) > float.Epsilon) {
+                    if (isMoveOffset) {
+                        Scroll (-offset);
+                    } else if (isMove) {
+                        // 优化用, Scroll用于非对称SIZE还是比较消耗效率
+                        //说明startIndex == mItemBottomIndex + 1
+                        ExpandMoveLast(1);
 
 
-                if (isMoveOffset)
-                    Scroll(-offset);
-                //ScrollIndex(ItemCount - 1);
+                        Vector3 off = Vector3.zero;
+                        if (IsHorizontal)
+                            off.x = offset;
+                        else if (IsVertical)
+                            off.y = offset;
+                        
+                        mScrollView.DisableSpring ();
+                        mScrollView.MoveRelative (off);
+                    }
+
+                    //ScrollIndex(ItemCount - 1);
+                }
             }
         }
     }
