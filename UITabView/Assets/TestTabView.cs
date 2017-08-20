@@ -40,9 +40,11 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 
 	private static readonly int m_SplitCnt = 5;
 
-    
+   // private bool m_IsFirst = true;
 	public void OnTabViewItemSize(int index, UIWidget item)
 	{
+     //   if (m_IsFirst)
+       //     return;
 
 		if (index != 0 && index%m_SplitCnt == 0)
 		{
@@ -56,6 +58,8 @@ public class TestTabView : MonoBehaviour, ITableViewData {
 
 	public void OnTabViewData (int index, UIWidget item, int subIndex)
 	{
+
+      //  m_IsFirst = false;
      //   if (subIndex == 0)
       //       Debug.LogFormat("FillItem: {0:D}", index);
    //     Debug.LogErrorFormat("FillItem: Index=>{0:D} SubIndex=>{1:D}", index, subIndex);
