@@ -50,9 +50,10 @@ public class WndChat : MonoBehaviour, ITableViewData {
         string text = m_InputView.value;
         if (string.IsNullOrEmpty (text))
             return;
-        
-        ChatDataManager.Instance.AddChat (string.Empty, text, "123");
-        m_ChatSize.Add (100);
-        m_ChatView.AddItem (1, true);
+      //  for (int i = 0; i < 100; ++i) {
+            ChatDataManager.Instance.AddChat (string.Empty, text, "123");
+            m_ChatSize.Add (100);
+            m_ChatView.AddItem ();
+       // }
     }
 }
