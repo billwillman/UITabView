@@ -1446,7 +1446,8 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
                 if (IsHorizontal) {
                     pos.x = lastNode.Value.cachedTransform.localPosition.x + lastNode.Value.width * (1 - lOffset.x) + node.Value.width * nOffset.x;
                 } else if (IsVertical) {
-                    pos.y = lastNode.Value.cachedTransform.localPosition.y - lastNode.Value.height * (1 - lOffset.y) - node.Value.height * nOffset.y;
+                    //  pos.y = lastNode.Value.cachedTransform.localPosition.y - lastNode.Value.height * (1 - lOffset.y) - node.Value.height * nOffset.y;
+                    pos.y = lastNode.Value.cachedTransform.localPosition.y - lastNode.Value.height * lOffset.y - node.Value.height * (1.0f - nOffset.y);
                 }
                 node.Value.cachedTransform.localPosition = pos;
 
