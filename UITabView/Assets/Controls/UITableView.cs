@@ -1372,9 +1372,9 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
                 Vector2 lOffset = firstNode.Value.pivotOffset;
                 Vector3 pos = node.Value.cachedTransform.localPosition;
                 if (IsHorizontal) {
-                    pos.x = firstNode.Value.cachedTransform.localPosition.x - firstNode.Value.width * lOffset.x - node.Value.width * (1 - nOffset.x);
+                    pos.x = firstNode.Value.cachedTransform.localPosition.x - firstNode.Value.width * lOffset.x - node.Value.width * (1.0f - nOffset.x);
                 } else if (IsVertical) {
-                    pos.y = firstNode.Value.cachedTransform.localPosition.y + firstNode.Value.height * lOffset.y + node.Value.height * (1 - nOffset.y);
+                    pos.y = firstNode.Value.cachedTransform.localPosition.y + firstNode.Value.height * (1.0f - lOffset.y) + node.Value.height * nOffset.y;
                 }
                 node.Value.cachedTransform.localPosition = pos;
 
