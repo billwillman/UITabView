@@ -51,7 +51,7 @@ namespace NsLib.UI.Message {
     /*
      * 一个界面只有一个PageLoop，但会有多个Page，可以拆分多个Page
      */
-    public interface IPage {
+    public interface IPage: IUILayer {
 
     }
 
