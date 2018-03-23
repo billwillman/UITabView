@@ -1751,11 +1751,15 @@ public class UITableView: MonoBehaviour, ITabViewScrollBar
         return ret;
     }
 
-    public void AddItem(int addCount = 1, int refreshStartIndex = -1, bool isMoveOffset = false) {
+    public void AddItem(int addCount = 1/*, int refreshStartIndex = -1*/, bool isMoveOffset = false) {
         if (addCount <= 0 || ItemObject == null || mScrollView == null || mItemList == null)
             return;
-        
-        int startIndex = refreshStartIndex >= 0 ? refreshStartIndex : ItemCount;
+        /*
+        if (refreshStartIndex >= 0 && refreshStartIndex < ItemTopIndex - 1)
+            refreshStartIndex = ItemTopIndex - 1;
+        */
+        int startIndex = /*refreshStartIndex >= 0 ? refreshStartIndex :*/ ItemCount;
+       
         ItemCount += addCount;
         if (Data != null) {
             bool isRefresh = false;
